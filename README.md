@@ -3,7 +3,7 @@
 #Lourenço Santos - 105122 - Lourenco21
 #Luís Parodi - 105363 - prodini03
 #David Palhas - 105121 - dpalhas
-#Miguel Lopes - 105255 - mslls
+#Miguel Lopes - 105255 - msllopes
 #Francisco Aguiar - 105451 - francisco-aguiar
 
 
