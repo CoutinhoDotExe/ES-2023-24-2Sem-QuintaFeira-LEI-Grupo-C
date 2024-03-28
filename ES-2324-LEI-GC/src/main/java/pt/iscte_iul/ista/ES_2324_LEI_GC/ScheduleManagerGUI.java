@@ -9,19 +9,28 @@ import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.sql.Date;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
+import java.util.Calendar;
 
 public class ScheduleManagerGUI extends JFrame {
     private static final String CSV_DELIMITER = ",";
     private static final String[] COLUMN_HEADERS = {
             "Curso", "Unidade Curricular", "Turno", "Turma", "Inscritos no turno",
             "Dia da semana", "Hora início da aula", "Hora fim da aula", "Data da aula",
-            "Características da sala pedida para a aula", "Sala atribuída à aula"
+            "Características da sala pedida para a aula", "Sala atribuída à aula", "Semana", "Semana-Semestre"
     };
     private JTable table;
     private JTextField searchField;
     private JComboBox<String> columnComboBox;
     private JCheckBox keepColumnCheckBox;
-    
+    private Toolkit toolkit = Toolkit.getDefaultToolkit();
+    private Dimension screenSize = toolkit.getScreenSize();
     public ScheduleManagerGUI() {
         setTitle("Schedule Manager");
         setSize(800, 600);
@@ -101,33 +110,48 @@ public class ScheduleManagerGUI extends JFrame {
 
     private void hideColumn(String columnName) {
         TableColumn column = table.getColumn(columnName);
-        if (column != null) {
-            if (!keepColumnCheckBox.isSelected()) {
-                table.removeColumn(column);
+        if (column.getWidth() == 0) {
+            column.setMinWidth(getWidth()/13);
+            column.setMaxWidth(screenSize.width/13);
+            column.setWidth(getWidth()/13);
+            column.setPreferredWidth(screenSize.width/13);
+        } else {
+
+            if (column != null) {
+                column.setMinWidth(0);
+                column.setMaxWidth(0);
+                column.setWidth(0);
+                column.setPreferredWidth(0);
             }
         }
     }
 
     private void loadSchedule() {
-        JFileChooser fileChooser = new JFileChooser();
-        int returnValue = fileChooser.showOpenDialog(this);
-        if (returnValue == JFileChooser.APPROVE_OPTION) {
-            DefaultTableModel model = (DefaultTableModel) table.getModel();
-            model.setRowCount(0); // Clear existing rows
-
-            try (BufferedReader reader = new BufferedReader(new FileReader(fileChooser.getSelectedFile()))) {
+    	 
+            try (BufferedReader reader = new BufferedReader(new FileReader("horario.csv"))) {
+            	DefaultTableModel model = (DefaultTableModel) table.getModel();
+                model.setRowCount(0); // Clear existing rows
                 String line;
+                boolean isFirst = true;
                 while ((line = reader.readLine()) != null) {
                     String[] parts = line.split(";");
-                    if (parts.length == COLUMN_HEADERS.length) {
-                        model.addRow(parts);
+                    int week = 0;
+                    int weekSemestre=0;
+                    if (parts.length>8 && !isFirst) {
+                    	week = getWeek(parts[8]);
+                    	weekSemestre = countWeeksBetween("13/09/2022", parts[8]);
                     }
+                    
+                    String [] partsUpdated = Arrays.copyOf(parts,13);
+                    partsUpdated[11]= String.valueOf(week);
+                    partsUpdated[12] = String.valueOf(weekSemestre);
+                    model.addRow(partsUpdated);
+                    isFirst = false;
                 }
             } catch (IOException ex) {
                 ex.printStackTrace();
                 JOptionPane.showMessageDialog(this, "Failed to load schedule from CSV file.", "Error", JOptionPane.ERROR_MESSAGE);
             }
-        }
     }
 
     public static void main(String[] args) {
@@ -138,6 +162,32 @@ public class ScheduleManagerGUI extends JFrame {
             }
         });
     }
-}
+    
+    public static int getWeek(String strdate) {
+    	 try {
+             SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+             java.util.Date date = sdf.parse(strdate);
+             Calendar calendar = Calendar.getInstance();
+             calendar.setTime(date);
+             int weekNumber = calendar.get(Calendar.WEEK_OF_YEAR);
+             return weekNumber;
+         } catch (ParseException e) {
+             e.printStackTrace();
+             return -1; 
+         }
+    }
+    
+    
+    //Considerando que a primeira semana é a de 13-09
+    public static int countWeeksBetween(String startDateStr, String endDateStr) {
+DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        
+        LocalDate startDate = LocalDate.parse(startDateStr, formatter);
+        
+        LocalDate endDate = LocalDate.parse(endDateStr, formatter);
+        
+        long weeks = ChronoUnit.WEEKS.between(startDate, endDate);
+        return (int) weeks;
+    }}
 
 

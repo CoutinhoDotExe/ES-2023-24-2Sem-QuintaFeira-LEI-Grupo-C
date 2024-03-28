@@ -19,7 +19,7 @@ public class ScheduleManager {
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        String csvFile = "C:\\Users\\couti\\eclipse-workspace\\ES\\ES-2324-LEI-GC\\src\\main\\java\\pt\\iscte_iul\\ista\\ES_2324_LEI_GC\\horario.csv";
+        String csvFile = "horario.csv";
         String htmlFile = "horar.html";
 
         List<ScheduleEntry> schedule = loadScheduleFromCSV(csvFile);
