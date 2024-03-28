@@ -65,7 +65,7 @@ public class ScheduleManagerGUI extends JFrame {
         searchField.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                filterTable(searchField.getText());
+                filterTable(searchField.getText(), (String) columnComboBox.getSelectedItem());
             }
         });
 
@@ -101,11 +101,25 @@ public class ScheduleManagerGUI extends JFrame {
         getContentPane().add(panel, BorderLayout.SOUTH);
     }
 
-    private void filterTable(String searchText) {
+    private void filterTable(String searchText, String columnName) {
         DefaultTableModel model = (DefaultTableModel) table.getModel();
         TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(model);
         table.setRowSorter(sorter);
-        sorter.setRowFilter(RowFilter.regexFilter("(?i)" + searchText));
+        int columnIndex = getColumnIndex(columnName);
+        if (columnIndex != -1) {
+            sorter.setRowFilter(RowFilter.regexFilter("(?i)" + searchText, columnIndex));
+        } else {
+            System.out.println("Column not found: " + columnName);
+        }
+    }
+
+    private int getColumnIndex(String columnName) {
+        for (int i = 0; i < COLUMN_HEADERS.length; i++) {
+            if (COLUMN_HEADERS[i].equals(columnName)) {
+                return i;
+            }
+        }
+        return -1; // Column not found
     }
 
     private void hideColumn(String columnName) {
