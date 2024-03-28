@@ -11,4 +11,6 @@
 # Erros e descrições
 
 
-#Funcionalidades ainda não implementadas: 1, 2, 3, 4, 5, 6, 7, 8, 9 
+#Funcionalidades ainda não implementadas: 1, 2, 3, 4, 5, 6, 7, 8, 9;
+#Parcialmente implementado: 2, ;
+#Funcionalidades implementadas: 1, ;
