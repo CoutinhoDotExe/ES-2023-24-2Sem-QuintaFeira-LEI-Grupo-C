@@ -28,7 +28,6 @@ public class ScheduleManagerGUI extends JFrame {
     private JTable table;
     private JTextField searchField;
     private JComboBox<String> columnComboBox;
-    private JCheckBox keepColumnCheckBox;
     private Toolkit toolkit = Toolkit.getDefaultToolkit();
     private Dimension screenSize = toolkit.getScreenSize();
     public ScheduleManagerGUI() {
@@ -72,10 +71,10 @@ public class ScheduleManagerGUI extends JFrame {
         // Create column combo box
         columnComboBox = new JComboBox<>(COLUMN_HEADERS);
         columnComboBox.setPreferredSize(new Dimension(200, 25));
-        columnComboBox.setToolTipText("Select column to hide");
+        columnComboBox.setToolTipText("Select column to hide/show");
 
         // Create hide column button
-        JButton hideColumnButton = new JButton("Hide Column");
+        JButton hideColumnButton = new JButton("Hide/Show Column");
         hideColumnButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -87,8 +86,6 @@ public class ScheduleManagerGUI extends JFrame {
         });
 
         // Create keep column checkbox
-        keepColumnCheckBox = new JCheckBox("Keep Column Visible");
-        keepColumnCheckBox.setSelected(false);
         // Add components to content pane
         getContentPane().setLayout(new BorderLayout());
         getContentPane().add(scrollPane, BorderLayout.CENTER);
@@ -97,7 +94,6 @@ public class ScheduleManagerGUI extends JFrame {
         panel.add(searchField);
         panel.add(columnComboBox);
         panel.add(hideColumnButton);
-        panel.add(keepColumnCheckBox);
         getContentPane().add(panel, BorderLayout.SOUTH);
     }
 
@@ -146,8 +142,11 @@ public class ScheduleManagerGUI extends JFrame {
             	DefaultTableModel model = (DefaultTableModel) table.getModel();
                 model.setRowCount(0); // Clear existing rows
                 String line;
-                boolean isFirst = true;
+                boolean isFirst = true;  
                 while ((line = reader.readLine()) != null) {
+                	if( isFirst ) {
+                		isFirst = false;
+                	} else {
                     String[] parts = line.split(";");
                     int week = 0;
                     int weekSemestre=0;
@@ -160,7 +159,7 @@ public class ScheduleManagerGUI extends JFrame {
                     partsUpdated[11]= String.valueOf(week);
                     partsUpdated[12] = String.valueOf(weekSemestre);
                     model.addRow(partsUpdated);
-                    isFirst = false;
+                	}
                 }
             } catch (IOException ex) {
                 ex.printStackTrace();
