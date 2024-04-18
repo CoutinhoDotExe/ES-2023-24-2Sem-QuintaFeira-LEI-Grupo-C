@@ -115,7 +115,7 @@ public class ScheduleManagerGUI extends JFrame {
                 return i;
             }
         }
-        return -1; // Column not found
+        return -1; 
     }
 
     private void hideColumn(String columnName) {
