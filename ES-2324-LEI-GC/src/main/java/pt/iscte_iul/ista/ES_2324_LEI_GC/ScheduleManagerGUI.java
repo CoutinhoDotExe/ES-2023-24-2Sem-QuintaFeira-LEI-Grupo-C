@@ -141,8 +141,15 @@ public class ScheduleManagerGUI extends JFrame {
     }
 
     private void loadSchedule() {
+    	
+//    	JFileChooser fileChooser = new JFileChooser();
+//        int returnValue = fileChooser.showOpenDialog(this);
+//        if (returnValue == JFileChooser.APPROVE_OPTION) {
+//            DefaultTableModel model = (DefaultTableModel) table.getModel();
+//            model.setRowCount(0); // Clear existing rows
+//        }
     	 
-            try (BufferedReader reader = new BufferedReader(new FileReader("horario.csv"))) {
+            try (BufferedReader reader = new BufferedReader(new FileReader(/*fileChooser.getSelectedFile()*/"horario.csv"))) {
             	DefaultTableModel model = (DefaultTableModel) table.getModel();
                 model.setRowCount(0); // Clear existing rows
                 String line;
