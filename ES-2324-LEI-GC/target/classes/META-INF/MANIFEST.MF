@@ -1,14 +1,5 @@
 Manifest-Version: 1.0
-<<<<<<< Updated upstream
-Built-By: couti
-Build-Jdk: 21.0.2
-=======
-<<<<<<< HEAD
-Built-By: luisc
-=======
-Built-By: User
->>>>>>> 3f4e88f83da3e7ce29c33957a63d73ec579f2fd7
+Built-By: david
 Build-Jdk: 17.0.10
->>>>>>> Stashed changes
 Created-By: Maven Integration for Eclipse
 
