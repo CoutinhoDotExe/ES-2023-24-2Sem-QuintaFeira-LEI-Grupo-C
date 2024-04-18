@@ -30,6 +30,8 @@ public class ScheduleManagerGUI extends JFrame {
     private JComboBox<String> columnComboBox;
     private Toolkit toolkit = Toolkit.getDefaultToolkit();
     private Dimension screenSize = toolkit.getScreenSize();
+    private TableRowSorter<DefaultTableModel> sorter;
+    
     public ScheduleManagerGUI() {
         setTitle("Schedule Manager");
         setSize(800, 600);
@@ -95,12 +97,13 @@ public class ScheduleManagerGUI extends JFrame {
         panel.add(columnComboBox);
         panel.add(hideColumnButton);
         getContentPane().add(panel, BorderLayout.SOUTH);
+        
+     // Create a row sorter
+        sorter = new TableRowSorter<>(model);
+        table.setRowSorter(sorter);
     }
 
-    private void filterTable(String searchText, String columnName) {
-        DefaultTableModel model = (DefaultTableModel) table.getModel();
-        TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(model);
-        table.setRowSorter(sorter);
+    private void filterTable(String searchText, String columnName) {        
         int columnIndex = getColumnIndex(columnName);
         if (columnIndex != -1) {
             sorter.setRowFilter(RowFilter.regexFilter("(?i)" + searchText, columnIndex));
@@ -108,6 +111,7 @@ public class ScheduleManagerGUI extends JFrame {
             System.out.println("Column not found: " + columnName);
         }
     }
+
 
     private int getColumnIndex(String columnName) {
         for (int i = 0; i < COLUMN_HEADERS.length; i++) {
