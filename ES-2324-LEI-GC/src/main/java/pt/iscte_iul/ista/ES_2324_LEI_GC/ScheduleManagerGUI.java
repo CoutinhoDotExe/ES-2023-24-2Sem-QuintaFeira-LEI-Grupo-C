@@ -35,7 +35,7 @@ public class ScheduleManagerGUI extends JFrame {
     
     public ScheduleManagerGUI() {
         setTitle("Schedule Manager");
-        setSize(800, 600);
+        setSize(1200, 800);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         // Create table with default table model
@@ -87,30 +87,43 @@ public class ScheduleManagerGUI extends JFrame {
                 }
             }
         });
-        // Add components to content pane
-        getContentPane().setLayout(new BorderLayout());
-        getContentPane().add(scrollPane, BorderLayout.CENTER);
-        JPanel panel = new JPanel();
-        panel.add(loadButton);
-        panel.add(searchField);
-        panel.add(columnComboBox);
-        panel.add(hideColumnButton);
-        getContentPane().add(panel, BorderLayout.SOUTH);
         // Create save button
-        JButton saveButton = new JButton("Save Schedule");
+        JButton saveButton = new JButton("Save Schedule as .CSV");
         saveButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 saveSchedule();
             }
         });
+        JButton saveButtonJSON = new JButton("Save Schedule as JSON");
+        saveButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                saveScheduleAsJson();
+            }
+        });
+        // Add components to content pane
+        getContentPane().setLayout(new BorderLayout());
+        getContentPane().add(scrollPane, BorderLayout.CENTER);
+        JPanel panel = new JPanel();
+        panel.add(loadButton);
         panel.add(saveButton);
+        panel.add(saveButtonJSON);
+        panel.add(searchField);
+        panel.add(columnComboBox);
+        panel.add(hideColumnButton);
+        getContentPane().add(panel, BorderLayout.SOUTH);
+
 
      // Create a row sorter
         sorter = new TableRowSorter<>(model);
         table.setRowSorter(sorter);
     }
-
+    
+    
+    
+    
+    
     private void filterTable(String searchText, String columnName) {        
         int columnIndex = getColumnIndex(columnName);
         if (columnIndex != -1) {
@@ -185,7 +198,7 @@ public class ScheduleManagerGUI extends JFrame {
                 JOptionPane.showMessageDialog(this, "Failed to load schedule from CSV file.", "Error", JOptionPane.ERROR_MESSAGE);
             }
     }
-    
+    //Function that allows saving the schedule as a CSV
     private void saveSchedule() {
         JFileChooser fileChooser = new JFileChooser();
         int returnValue = fileChooser.showSaveDialog(this);
@@ -209,6 +222,47 @@ public class ScheduleManagerGUI extends JFrame {
             }
         }
     }
+    
+    //Function that allows saving the schedule as a JSON
+    private void saveScheduleAsJson() {
+    	JFileChooser fileChooser = new JFileChooser();
+    	int returnValue = fileChooser.showSaveDialog(this);
+    	if (returnValue == JFileChooser.APPROVE_OPTION) {
+    		try (FileWriter writer = new FileWriter(fileChooser.getSelectedFile() + ".json")) {
+    			DefaultTableModel model = (DefaultTableModel) table.getModel();
+            	StringBuilder jsonBuilder = new StringBuilder("[\n");
+            	for (int i = 0; i < model.getRowCount(); i++) {
+            		jsonBuilder.append("  {\n");
+            		for (int j = 0; j < model.getColumnCount(); j++) {
+            			Object value = model.getValueAt(i, j);
+            			String columnName = table.getColumnName(j);
+            			jsonBuilder.append("    \"").append(columnName).append("\": ");
+            			if (value != null) {
+            				jsonBuilder.append("\"").append(value.toString()).append("\"");
+            			} else {
+            				jsonBuilder.append("null");
+            			}
+            			if (j < model.getColumnCount() - 1) {
+            				jsonBuilder.append(",");
+            			}
+            		jsonBuilder.append("\n");
+            		}
+                jsonBuilder.append("  }");
+                if (i < model.getRowCount() - 1) {
+                    jsonBuilder.append(",");
+                }
+                jsonBuilder.append("\n");
+            }
+            jsonBuilder.append("]");
+            writer.write(jsonBuilder.toString());
+            JOptionPane.showMessageDialog(this, "Schedule saved successfully as JSON.", "Success", JOptionPane.INFORMATION_MESSAGE);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Failed to save schedule as JSON.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+}
+    
     
     
     public static void main(String[] args) {
