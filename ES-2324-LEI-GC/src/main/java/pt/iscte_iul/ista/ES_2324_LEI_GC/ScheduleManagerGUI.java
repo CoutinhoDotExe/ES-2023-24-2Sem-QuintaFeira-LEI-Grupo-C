@@ -8,6 +8,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.Date;
 import java.text.ParseException;
@@ -19,7 +20,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 
 public class ScheduleManagerGUI extends JFrame {
-    private static final String CSV_DELIMITER = ",";
+    private static final String CSV_DELIMITER = ";";
     private static final String[] COLUMN_HEADERS = {
             "Curso", "Unidade Curricular", "Turno", "Turma", "Inscritos no turno",
             "Dia da semana", "Hora início da aula", "Hora fim da aula", "Data da aula",
@@ -86,8 +87,6 @@ public class ScheduleManagerGUI extends JFrame {
                 }
             }
         });
-
-        // Create keep column checkbox
         // Add components to content pane
         getContentPane().setLayout(new BorderLayout());
         getContentPane().add(scrollPane, BorderLayout.CENTER);
@@ -97,7 +96,16 @@ public class ScheduleManagerGUI extends JFrame {
         panel.add(columnComboBox);
         panel.add(hideColumnButton);
         getContentPane().add(panel, BorderLayout.SOUTH);
-        
+        // Create save button
+        JButton saveButton = new JButton("Save Schedule");
+        saveButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                saveSchedule();
+            }
+        });
+        panel.add(saveButton);
+
      // Create a row sorter
         sorter = new TableRowSorter<>(model);
         table.setRowSorter(sorter);
@@ -158,10 +166,10 @@ public class ScheduleManagerGUI extends JFrame {
                 	if( isFirst ) {
                 		isFirst = false;
                 	} else {
-                    String[] parts = line.split(";");
+                    String[] parts = line.split(CSV_DELIMITER);
                     int week = 0;
                     int weekSemestre=0;
-                    if (parts.length>8 && !isFirst) {
+                    if (parts.length>8 && !isFirst && !parts[8].isEmpty() ) {   ///a cena do isFirst não sei se é ideal porque ao dar load a um horario gravado vai ignorar a primeira linha
                     	week = getWeek(parts[8]);
                     	weekSemestre = countWeeksBetween("13/09/2022", parts[8]);
                     }
@@ -177,7 +185,32 @@ public class ScheduleManagerGUI extends JFrame {
                 JOptionPane.showMessageDialog(this, "Failed to load schedule from CSV file.", "Error", JOptionPane.ERROR_MESSAGE);
             }
     }
-
+    
+    private void saveSchedule() {
+        JFileChooser fileChooser = new JFileChooser();
+        int returnValue = fileChooser.showSaveDialog(this);
+        if (returnValue == JFileChooser.APPROVE_OPTION) {
+            try (FileWriter writer = new FileWriter(fileChooser.getSelectedFile() + ".csv")) {
+                DefaultTableModel model = (DefaultTableModel) table.getModel();
+                for (int i = 0; i < model.getRowCount(); i++) {
+                    for (int j = 0; j < model.getColumnCount(); j++) {
+                        Object value = model.getValueAt(i, j);
+                        if (value != null) {
+                            writer.write(value.toString());
+                        }
+                        writer.write(CSV_DELIMITER); // Include delimiter for each cell
+                    }
+                    writer.write(System.lineSeparator());
+                }
+                JOptionPane.showMessageDialog(this, "Schedule saved successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
+            } catch (IOException ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(this, "Failed to save schedule to CSV file.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+    
+    
     public static void main(String[] args) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
