@@ -119,11 +119,8 @@ public class ScheduleManagerGUI extends JFrame {
         sorter = new TableRowSorter<>(model);
         table.setRowSorter(sorter);
     }
-    
-    
-    
-    
-    
+
+    //filters the table
     private void filterTable(String searchText, String columnName) {        
         int columnIndex = getColumnIndex(columnName);
         if (columnIndex != -1) {
@@ -161,7 +158,7 @@ public class ScheduleManagerGUI extends JFrame {
         }
     }
 
-    private void loadSchedule() {
+    protected void loadSchedule() {
     	
 //    	JFileChooser fileChooser = new JFileChooser();
 //        int returnValue = fileChooser.showOpenDialog(this);
