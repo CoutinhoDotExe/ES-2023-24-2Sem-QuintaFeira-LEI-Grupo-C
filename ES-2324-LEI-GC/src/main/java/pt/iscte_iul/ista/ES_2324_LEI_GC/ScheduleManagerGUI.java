@@ -124,7 +124,7 @@ public class ScheduleManagerGUI extends JFrame {
         panel.add(saveButtonJSON);
         panel.add(eouButton);
         panel.add(columnComboBox);
-        panel.add(hideColumnButton);
+//        panel.add(hideColumnButton);
         getContentPane().add(panel, BorderLayout.SOUTH);
 
 
