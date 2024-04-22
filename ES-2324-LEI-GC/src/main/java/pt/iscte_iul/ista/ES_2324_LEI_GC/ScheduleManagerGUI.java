@@ -28,10 +28,13 @@ public class ScheduleManagerGUI extends JFrame {
     };
     private JTable table;
     private JTextField searchField;
+    private JPanel headerPanel = new JPanel(new GridLayout(1, COLUMN_HEADERS.length));
+    private JTextField[] filterFields = new JTextField[COLUMN_HEADERS.length];
     private JComboBox<String> columnComboBox;
     private Toolkit toolkit = Toolkit.getDefaultToolkit();
     private Dimension screenSize = toolkit.getScreenSize();
     private TableRowSorter<DefaultTableModel> sorter;
+    private int eou = 0;
     
     public ScheduleManagerGUI() {
         setTitle("Schedule Manager");
@@ -47,6 +50,7 @@ public class ScheduleManagerGUI extends JFrame {
         };
         for (String header : COLUMN_HEADERS) {
             model.addColumn(header);
+
         }
         table = new JTable(model);
         // Add table to scroll pane
@@ -60,16 +64,6 @@ public class ScheduleManagerGUI extends JFrame {
             }
         });
 
-        // Create search field
-        searchField = new JTextField();
-        searchField.setPreferredSize(new Dimension(200, 25));
-        searchField.setToolTipText("Search...");
-        searchField.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                filterTable(searchField.getText(), (String) columnComboBox.getSelectedItem());
-            }
-        });
 
         // Create column combo box
         columnComboBox = new JComboBox<>(COLUMN_HEADERS);
@@ -102,6 +96,22 @@ public class ScheduleManagerGUI extends JFrame {
                 saveScheduleAsJson();
             }
         });
+        //Create E/OU button
+        JButton eouButton = new JButton("Filter - AND");
+        eouButton.addActionListener(new ActionListener() {
+        	@Override
+        	public void actionPerformed(ActionEvent e) {
+        		if(eouButton.getText().equals("Filter - AND")) {
+        				eouButton.setText("Filter - OR");
+        				eou++;		
+        		}
+        		else {
+        			eouButton.setText("Filter - AND");
+        			eou--;
+        		}
+        	}
+        });
+        
         // Add components to content pane
         getContentPane().setLayout(new BorderLayout());
         getContentPane().add(scrollPane, BorderLayout.CENTER);
@@ -109,7 +119,7 @@ public class ScheduleManagerGUI extends JFrame {
         panel.add(loadButton);
         panel.add(saveButton);
         panel.add(saveButtonJSON);
-        panel.add(searchField);
+        panel.add(eouButton);
         panel.add(columnComboBox);
         panel.add(hideColumnButton);
         getContentPane().add(panel, BorderLayout.SOUTH);
@@ -118,17 +128,50 @@ public class ScheduleManagerGUI extends JFrame {
      // Create a row sorter
         sorter = new TableRowSorter<>(model);
         table.setRowSorter(sorter);
+        
+     // Add filter fields to header panel
+        for (int i = 0; i < COLUMN_HEADERS.length; i++) { 
+            JTextField filterField = new JTextField();
+            filterField.setPreferredSize(new Dimension(100, 25));
+            filterField.setToolTipText("Filter " + COLUMN_HEADERS[i]);
+            filterField.addActionListener(new FilterActionListener(i));
+            headerPanel.add(filterField);
+            filterFields[i] = filterField;
+        }
+        getContentPane().add(headerPanel, BorderLayout.NORTH);
+    }
+    
+ // Filter action listener for filter fields
+    private class FilterActionListener implements ActionListener {
+        private int columnIndex;
+
+        public FilterActionListener(int columnIndex) {
+            this.columnIndex = columnIndex;
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            filterTable(filterFields[columnIndex].getText(), COLUMN_HEADERS[columnIndex]);
+        }
     }
 
     //filters the table
-    private void filterTable(String searchText, String columnName) {        
-        int columnIndex = getColumnIndex(columnName);
-        if (columnIndex != -1) {
+    private void filterTable(String searchText, String columnName) {
+        if (columnName != null && !columnName.isEmpty()) {
+            int columnIndex = getColumnIndex(columnName);
             sorter.setRowFilter(RowFilter.regexFilter("(?i)" + searchText, columnIndex));
         } else {
-            System.out.println("Column not found: " + columnName);
+            sorter.setRowFilter(RowFilter.regexFilter("(?i)" + searchText));
         }
     }
+    
+    private void filterfilter(String searchText, String columnName) {
+    	if(eou == 0) {
+    		
+    	}
+    }
+    
+    
 
 
     private int getColumnIndex(String columnName) {
