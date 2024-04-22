@@ -16,6 +16,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 
@@ -26,6 +27,7 @@ public class ScheduleManagerGUI extends JFrame {
             "Dia da semana", "Hora início da aula", "Hora fim da aula", "Data da aula",
             "Características da sala pedida para a aula", "Sala atribuída à aula", "Semana", "Semana-Semestre"
     };
+    private int nrColumns = 13;
     private JTable table;
     private JTextField searchField;
     private JPanel headerPanel = new JPanel(new GridLayout(1, COLUMN_HEADERS.length));
@@ -103,12 +105,13 @@ public class ScheduleManagerGUI extends JFrame {
         	public void actionPerformed(ActionEvent e) {
         		if(eouButton.getText().equals("Filter - AND")) {
         				eouButton.setText("Filter - OR");
-        				eou++;		
+        				eou++;
         		}
         		else {
         			eouButton.setText("Filter - AND");
         			eou--;
         		}
+        		filterTable();
         	}
         });
         
@@ -151,28 +154,50 @@ public class ScheduleManagerGUI extends JFrame {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            filterTable(filterFields[columnIndex].getText(), COLUMN_HEADERS[columnIndex]);
+            filterTable();
         }
     }
 
-    //filters the table
-    private void filterTable(String searchText, String columnName) {
-        if (columnName != null && !columnName.isEmpty()) {
-            int columnIndex = getColumnIndex(columnName);
-            sorter.setRowFilter(RowFilter.regexFilter("(?i)" + searchText, columnIndex));
+ // filters the table
+    private void filterTable() {
+        ArrayList<RowFilter<Object, Object>> filters = new ArrayList<>();
+
+        for (int i = 0; i < filterFields.length; i++) {
+            if (filterFields[i].getText().length() > 0) {
+                String columnName = COLUMN_HEADERS[i];
+                int columnIndex = getColumnIndex(columnName);
+                String querie = filterFields[i].getText();
+                if (querie.contains("or")) {
+                    filters.add(getOrConditions(querie, columnName, columnIndex));
+                } else if (querie.contains("&&")) {
+                    // faz sentido??
+                    // que sei eu do que serei eu que não sei o que sou! , xicao pessoa
+                } else {
+                    filters.add(RowFilter.regexFilter("(?i)" + querie, columnIndex));
+                }
+            }
+        }
+
+        RowFilter<Object, Object> combinedFilter = RowFilter.andFilter(filters);
+        if (eou == 0) {
+            combinedFilter = RowFilter.andFilter(filters);
         } else {
-            sorter.setRowFilter(RowFilter.regexFilter("(?i)" + searchText));
+            combinedFilter = RowFilter.orFilter(filters);
+        }
+        if (filters.size() > 0) {
+            sorter.setRowFilter(combinedFilter);
         }
     }
-    
-    private void filterfilter(String searchText, String columnName) {
-    	if(eou == 0) {
-    		
-    	}
+
+    private RowFilter<Object, Object> getOrConditions(String querie, String columnName2, int columnIndex) {
+        ArrayList<RowFilter<Object, Object>> filters = new ArrayList<>();
+        String[] parts = querie.split("or");
+        for (int i = 0; i < parts.length; i++) {
+            filters.add(RowFilter.regexFilter("(?i)" + parts[i], columnIndex));
+        }
+        return RowFilter.orFilter(filters);
     }
     
-    
-
 
     private int getColumnIndex(String columnName) {
         for (int i = 0; i < COLUMN_HEADERS.length; i++) {
@@ -183,22 +208,47 @@ public class ScheduleManagerGUI extends JFrame {
         return -1; 
     }
 
-    private void hideColumn(String columnName) {
+	private void hideColumn(String columnName) {
+    	
         TableColumn column = table.getColumn(columnName);
         if (column.getWidth() == 0) {
-            column.setMinWidth(getWidth()/13);
-            column.setMaxWidth(screenSize.width/13);
-            column.setWidth(getWidth()/13);
-            column.setPreferredWidth(screenSize.width/13);
+        	nrColumns++;
+        	column.setMinWidth(1);
+            column.setMaxWidth(1);
+            column.setWidth(1);
+            column.setPreferredWidth(1);
+            
+         //   filterFields[getColumnIndex(columnName)].se
+            
         } else {
-
-            if (column != null) {
+                nrColumns--;
+            
                 column.setMinWidth(0);
                 column.setMaxWidth(0);
                 column.setWidth(0);
                 column.setPreferredWidth(0);
+                filterFields[getColumnIndex(columnName)].setSize(0, 0);
+                
+               // filterFields[getColumnIndex(columnName)].setVisible(false);
+        }
+        for (int i = 0; i < table.getColumnCount(); i++) { 
+            if(table.getColumn(COLUMN_HEADERS[i]).getMaxWidth() != 0) {
+            	table.getColumn(COLUMN_HEADERS[i]).setMinWidth(getWidth()/nrColumns);
+            	table.getColumn(COLUMN_HEADERS[i]).setMaxWidth(getWidth()/nrColumns);
+            	table.getColumn(COLUMN_HEADERS[i]).setWidth(getWidth()/nrColumns);
+            	table.getColumn(COLUMN_HEADERS[i]).setPreferredWidth(getWidth()/nrColumns);
+            	filterFields[i].setSize(getWidth()/nrColumns, 25);
             }
         }
+//        for (int i = 0; i < COLUMN_HEADERS.length; i++) { 
+//            JTextField filterField = new JTextField();
+//            filterField.setPreferredSize(new Dimension(getWidth()/nrColumns, 25));
+//            filterField.setToolTipText("Filter " + COLUMN_HEADERS[i]);
+//            filterField.addActionListener(new FilterActionListener(i));
+//            headerPanel.add(filterField);
+//            filterFields[i] = filterField;
+//        }
+//        getContentPane().add(headerPanel, BorderLayout.NORTH);
     }
 
     protected void loadSchedule() {
