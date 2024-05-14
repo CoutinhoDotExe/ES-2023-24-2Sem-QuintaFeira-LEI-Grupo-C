@@ -38,7 +38,5 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/5"/>
-	<classpathentry kind="lib" path="C:/Users/couti/Downloads/jheatchart-0.6.zip"/>
-	<classpathentry kind="lib" path="C:/Users/couti/Downloads/jheatchart-0.6.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
